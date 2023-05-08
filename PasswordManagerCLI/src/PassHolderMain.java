@@ -1,9 +1,9 @@
 
-/*import java.nio.charset.Charset;
-import java.util.Random;*/
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Scanner;
 
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
@@ -24,6 +24,7 @@ public class PassHolderMain {
 		singleton = Singleton.getInstance();
 		String key;
 
+		System.out.println(singleton.getList().size());
 		
 		if(singleton.getList().size() <= 0)
 		{
@@ -53,7 +54,7 @@ public class PassHolderMain {
 		//2. View
 		//3. Delete
 		//4. Edit
-		//5. Pass Gen
+		//5. Close
 		
 		System.out.println("Password Holder");
 		System.out.println("------------------------");
@@ -62,6 +63,7 @@ public class PassHolderMain {
 		System.out.println("2. View");
 		System.out.println("3. Delete");
 		System.out.println("4. Edit");
+		System.out.println("5. Exit");
 		
 		String holder = scan.nextLine();
 	
@@ -70,6 +72,7 @@ public class PassHolderMain {
 		switch(holder)
 		{
 			case "1":
+				//adds an account to the DB
 				addAccount();
 				
 				System.out.println("--------------");
@@ -77,21 +80,29 @@ public class PassHolderMain {
 				break;
 				
 			case "2":
+				//views all the accounts in the DB
 				viewAccounts();
 				System.out.println("--------------");
 				menu();
 				break;
 			case "3":
+				//Delete an accounts in the DB
 				deleteAccount();
 				System.out.println("--------------");
 				menu();
 				break;
 			case "4":
+				//Edit an account in the DB
 				editAccount();
 				System.out.println("--------------");
 				menu();
 				break;
 				
+			case "5":
+				//close the app and close the scanner
+				scan.close();
+				System.exit(0);
+				break;
 			default:
 				System.out.println("Must enter a number between 1 - 5");
 				menu();
@@ -135,10 +146,12 @@ public class PassHolderMain {
 	//add an account
 	private static void addAccount() throws SQLException {
 		
+		//gets the size of the list
 		int listPosn = singleton.getList().size()+1;
 		int flag = 0;
 	
-		
+	
+		//enter the attributes
 		System.out.println("Add Account"); 
 		Scanner usr_inp = new Scanner(System.in);
 
@@ -152,22 +165,29 @@ public class PassHolderMain {
 		String pass = usr_inp.nextLine();
 		singleton.PasswordEncryption(pass);
 		
+		//checks to see if the account is already stored
 		for(int i =0; i < singleton.getList().size(); i++)
 		{
+			//checks to see if both the website name and username is the same details already stored
 			if(singleton.getAccountFromList(i).getAccountName().equals(accHolder) && singleton.getAccountFromList(i).getAccountUserName().equals(accUserName))
 			{
+				//display text
 				System.out.println("Account Already Stored");
-				return;
+				return; //leave the method
 			}
 		}
 	
+		//checks to see if all details are entered
 		if(!accHolder.equals("") && !accUserName.equals("") && !pass.equals(""))
 		{
+			//creates a new account object
 			Account acc = new Account(listPosn, accHolder,accUserName, singleton.getEncrypPass() , "null");
+			//adds the object to the list which will be stored in a local DB
 			singleton.addAccountToList(acc);		
 		}
-		else
+		else //if certain details are missing
 		{
+			//check to see which items are missing
 			if(accHolder.equals("") && accUserName.equals("") && pass.equals(""))
 			{
 				System.out.println("No information entered, did not add account!");
